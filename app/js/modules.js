@@ -40,7 +40,7 @@ CORE.createModule('editable', function(sb){
             });
         }
     }
-})
+});
 
 CORE.createModule('editor', function(sb){
     return {
