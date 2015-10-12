@@ -1,6 +1,11 @@
-var Sandbox = function(core, module_selector){
-    var CONTAINER = core.dom.query('#' moduleSelector);
+var Sandbox = function(){
+    var CONTAINER, core, moduleSelector;
     return {
+        create: function(core, moduleSelector){
+            CONTAINER = core.dom.query('#' + moduleSelector);
+            core = core;
+            moduleSelector = moduleSelector;
+        },
         find: function(selector){
             return CONTAINER.find(selector)[0];
         },
@@ -23,4 +28,4 @@ var Sandbox = function(core, module_selector){
             core.removeEvents(evts, moduleSelector);
         }
     }
-}
+}();
