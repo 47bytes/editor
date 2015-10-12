@@ -116,7 +116,65 @@ var CORE = function(){
                     return that.query(selectr, jqEls);
                 }
                 return result;
+            },
+            bind: function(elem, evt, fn){
+                if (element && evt) {
+                    if (typeof evt === 'function') {
+                        fn = evt;
+                        evt = 'click';
+                    }
+                    jQuery(element).bind(evt, fn);
+                } else {
+                    // log wrong arguments
+                }
+            },
+            unbind: function(elem, evt, fn){
+                if (element && evt) {
+            		if (typeof evt === 'function') {
+            			fn = evt;
+            			evt = 'click';
+            		}
+            		jQuery(element).unbind(evt, fn);
+            	} else {
+            		// log wrong arguments
+            	}
             }
+        },
+        registerEvents: function(evts, moduleSelector){
+            if (this.is_obj(evts) && mod) {
+        		if (moduleData[mod]) {
+        			moduleData[mod].events = evts;
+        		} else {
+        			// log
+        		}
+        	} else {
+        		// log
+        	}
+        },
+        removeEvents: function(evts, moduleSelector){
+            var i = 0, evt;
+        	if (this.is_arr(evts) && mod && (mod = moduleData[mod]) && mod.events) {
+        		for ( ; evt = evts[i++] ; ) {
+        				delete mod.events[evt];
+        			}
+        	}
+        },
+        triggerEvent: function(evt){
+            var mod;
+        	for (mod in moduleData) {
+        		if (moduleData.hasOwnProperty(mod)){
+        			mod = moduleData[mod];
+        			if (mod.events && mod.events[evt.type]) {
+        				mod.events[evt.type](evt.data);
+        			}
+        		}
+        	}
+        },
+        is_arr : function (arr) {
+            return jQuery.isArray(arr);
+        },
+        is_obj : function (obj) {
+            return jQuery.isPlainObject(obj);
         }
     }
 }();
