@@ -14,15 +14,19 @@ CORE.createModule('editable', function(sb){
             var i = 0;
             var j = 0;
             var editableElem;
-
             for(; editable = editableElementTypes[i++]; ){
+                console.log("editable****");
+                console.log(editable)
                 // get all editable elements
                 editableElems = sb.findAll(editable);
-                for(; editableElem = editableElems[i++]; ){
+                console.log('editableElems*********');
+                console.log(editableElems);
+                for(; editableElem = editableElems[j++]; ){
                     // we cache the elements for later destruction
                     editableElements.push(editableElem);
                     // attach click event for every editable element
-                    sb.addEvent(editableElem, 'click', this.edit);
+                    console.log(editableElem);
+                    sb.addEvent(editableElem, 'click', function(){console.log('click')});
                 }
             }
 
@@ -34,6 +38,7 @@ CORE.createModule('editable', function(sb){
             }
         },
         edit: function(e){
+            console.log('click');
             sb.notify({
                 type: 'editing',
                 data: e.currentTarget.innerHTML
@@ -70,3 +75,5 @@ CORE.createModule('toolbar', function(sb){
         },
     }
 });
+
+CORE.startAll();

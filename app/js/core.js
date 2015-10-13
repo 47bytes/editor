@@ -100,6 +100,39 @@ var CORE = function(){
                 this.logger.log(this.logger.WARNING, 'Module '+ moduleID + 'registration failed: argument moduleID has to be of type string, argument creator has to be of type function');
             }
         },
+        start: function(moduleID){
+            var mod = moduleData[moduleID];
+            var sn;
+            if(mod){
+                sn = Sandbox.create(this, moduleID);
+                mod.instance = mod.create(sn);
+                mod.instance.init();
+            }
+        },
+        startAll: function(){
+            var moduleID,
+                i = 0;
+            for(moduleID in moduleData){
+                this.start(moduleID);
+            }
+        },
+        stop: function(moduleID){
+            var data;
+            if(data = moduleData[moduleID] && data.instance){
+                data.instance.destroy();
+                data.instance = null;
+            }else{
+                // logging
+            }
+        },
+        stopAll: function(){
+            var moduleID;
+            for (moduleID in moduleData) {
+        		if (moduleData.hasOwnProperty(moduleID)) {
+        			this.stop(moduleID);
+        		}
+        	}
+        },
         dom: {
             query: function(selector, context){
                 var result = {}, that = this, jqEls, i = 0;
@@ -118,32 +151,32 @@ var CORE = function(){
                 return result;
             },
             bind: function(elem, evt, fn){
-                if (element && evt) {
+                if (elem && evt) {
                     if (typeof evt === 'function') {
                         fn = evt;
                         evt = 'click';
                     }
-                    jQuery(element).bind(evt, fn);
+                    jQuery(elem).bind(evt, fn);
                 } else {
                     // log wrong arguments
                 }
             },
             unbind: function(elem, evt, fn){
-                if (element && evt) {
+                if (elem && evt) {
             		if (typeof evt === 'function') {
             			fn = evt;
             			evt = 'click';
             		}
-            		jQuery(element).unbind(evt, fn);
+            		jQuery(elem).unbind(evt, fn);
             	} else {
             		// log wrong arguments
             	}
             }
         },
         registerEvents: function(evts, moduleSelector){
-            if (this.is_obj(evts) && mod) {
-        		if (moduleData[mod]) {
-        			moduleData[mod].events = evts;
+            if (this.is_obj(evts) && moduleSelector) {
+        		if (moduleData[moduleSelector]) {
+        			moduleData[moduleSelector].events = evts;
         		} else {
         			// log
         		}
@@ -153,7 +186,7 @@ var CORE = function(){
         },
         removeEvents: function(evts, moduleSelector){
             var i = 0, evt;
-        	if (this.is_arr(evts) && mod && (mod = moduleData[mod]) && mod.events) {
+        	if (this.is_arr(evts) && moduleSelector && (mod = moduleData[moduleSelector]) && mod.events) {
         		for ( ; evt = evts[i++] ; ) {
         				delete mod.events[evt];
         			}

@@ -1,31 +1,32 @@
 var Sandbox = function(){
-    var CONTAINER, core, moduleSelector;
+    var CONTAINER, CORE, MODULE_SELECTOR;
     return {
         create: function(core, moduleSelector){
             CONTAINER = core.dom.query('#' + moduleSelector);
-            core = core;
-            moduleSelector = moduleSelector;
+            CORE = core;
+            MODULE_SELECTOR = moduleSelector;
+            return this;
         },
         find: function(selector){
             return CONTAINER.find(selector)[0];
         },
         findAll: function(selector){
-            return CONTAINER.find(selector);
+            return CONTAINER.query(selector);
         },
         addEvent: function(elem, evt, fn){
-            core.dom.bind(elem, evt, fn);
+            CORE.dom.bind(elem, evt, fn);
         },
         removeEvent: function(elem, evt, fn){
-            core.dom.unbind(elem, evt, fn);
+            CORE.dom.unbind(elem, evt, fn);
         },
         notify: function(evt){
-            core.triggerEvent(evt);
+            CORE.triggerEvent(evt);
         },
         listen: function(evts){
-            core.registerEvents(evts, moduleSelector);
+            CORE.registerEvents(evts, MODULE_SELECTOR);
         },
         ignore: function(evts){
-            core.removeEvents(evts, moduleSelector);
+            CORE.removeEvents(evts, MODULE_SELECTOR);
         }
     }
 }();
