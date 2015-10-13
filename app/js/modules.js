@@ -21,11 +21,12 @@ CORE.createModule('editable', function(sb){
                 editableElems = sb.findAll(editable);
                 console.log('editableElems*********');
                 console.log(editableElems);
-                for(; editableElem = editableElems[j++]; ){
+                for(j = 0; j<editableElems.length; j++){
+                    editableElem = editableElems[j];
                     // we cache the elements for later destruction
                     editableElements.push(editableElem);
                     // attach click event for every editable element
-                    console.log(editableElem);
+                    console.log('****************************'+editableElem);
                     sb.addEvent(editableElem, 'click', function(){console.log('click')});
                 }
             }
