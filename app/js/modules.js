@@ -1,4 +1,5 @@
 CORE.createModule('editable', function(sb){
+    var thiz = this;
     var editableElementTypes = [
         'div',
         'span',
@@ -9,46 +10,42 @@ CORE.createModule('editable', function(sb){
         'h4'
     ];
     var editableElements = [];
+
     return {
         init: function(){
-            var i = 0;
-            var j = 0;
+            var i, j;
             var editableElem;
-            for(; editable = editableElementTypes[i++]; ){
-                console.log("editable****");
-                console.log(editable)
+            for(i = 0; i < editableElementTypes.length; i++){
+                editable = editableElementTypes[i];
                 // get all editable elements
                 editableElems = sb.findAll(editable);
-                console.log('editableElems*********');
-                console.log(editableElems);
-                for(j = 0; j<editableElems.length; j++){
+                for(j = 0; j < editableElems.length; j++){
                     editableElem = editableElems[j];
                     // we cache the elements for later destruction
                     editableElements.push(editableElem);
                     // attach click event for every editable element
-                    console.log('****************************'+editableElem);
-                    sb.addEvent(editableElem, 'click', function(){console.log('click')});
+                    sb.addEvent(editableElem, 'click', this.edit);
                 }
             }
 
         },
         destroy: function(){
-            var i = 0;
-            for(; editable = editableElements[i++]; ){
-                sb.removeEvent(editable, 'click', null);
+            var i;
+            for(i = 0; i < editableElements.length; i++ ){
+                sb.removeEvent(editableElements[i], 'click', null);
             }
         },
+
         edit: function(e){
-            console.log('click');
-            sb.notify({
-                type: 'editing',
-                data: e.currentTarget.innerHTML
-            });
-        }
+            sb.hide();
+
+        },
+
     }
 });
 
 CORE.createModule('editor', function(sb){
+    var thiz = this;
     return {
         init: function(){
             sb.listen({
@@ -60,21 +57,23 @@ CORE.createModule('editor', function(sb){
             sb.ignore(['editing']);
         },
         editContent: function(content){
-            console.log(content);
+            console.dir(content);
         }
 
     }
 });
 
 CORE.createModule('toolbar', function(sb){
+    var thiz = this;
     return {
         init: function(){
-
+            console.log('toolbar initialized')
         },
         destroy: function(){
 
         },
     }
 });
+
 
 CORE.startAll();

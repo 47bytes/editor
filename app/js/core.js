@@ -86,27 +86,31 @@ var CORE = function(){
         createModule: function(moduleID, creator){
             var temp;
             if(typeof moduleID === 'string' && typeof creator === 'function'){
-                temp = creator(Sandbox.create(this, moduleID));
+                // we're going to call the creator so we can check
+                // if it got init and destroy methods
+                temp = creator(null);
                 if(temp.init && temp.destroy && typeof temp.init === 'function' && typeof temp.destroy === 'function'){
                     moduleData[moduleID] = {
-                        create: creator,
+                        creator: creator,
                         instance: null
                     };
                     temp = null;
                 }else{
-                    this.logger.log(this.logger.WARNING, 'Module '+ moduleID + 'registration failed: Module has no init or destroy method.');
+                    this.logger.warning('Module '+ moduleID + 'registration failed: Module has no init or destroy method.');
                 }
             }else{
-                this.logger.log(this.logger.WARNING, 'Module '+ moduleID + 'registration failed: argument moduleID has to be of type string, argument creator has to be of type function');
+                this.logger.warning('Module '+ moduleID + 'registration failed: argument moduleID has to be of type string, argument creator has to be of type function');
             }
         },
         start: function(moduleID){
-            var mod = moduleData[moduleID];
-            var sn;
-            if(mod){
-                sn = Sandbox.create(this, moduleID);
-                mod.instance = mod.create(sn);
-                mod.instance.init();
+            var module = moduleData[moduleID];
+            var sn = Sandbox();
+            if(module){
+                //sn = Sandbox.create(this, moduleID);
+                module.instance = module.creator(sn.create(this, moduleID));
+                module.instance.init();
+
+                this.logger.debug('Module `'+moduleID+'` started');
             }
         },
         startAll: function(){
@@ -117,10 +121,10 @@ var CORE = function(){
             }
         },
         stop: function(moduleID){
-            var data;
-            if(data = moduleData[moduleID] && data.instance){
-                data.instance.destroy();
-                data.instance = null;
+            var module = moduleData[moduleID];
+            if(module.instance){
+                module.instance.destroy();
+                module.instance = null;
             }else{
                 // logging
             }
@@ -171,34 +175,39 @@ var CORE = function(){
             	} else {
             		// log wrong arguments
             	}
+            },
+            animate: {
+                hide: function(elem){
+                    jQuery(elem).hide();
+                }
             }
         },
-        registerEvents: function(evts, moduleSelector){
-            if (this.is_obj(evts) && moduleSelector) {
-        		if (moduleData[moduleSelector]) {
-        			moduleData[moduleSelector].events = evts;
-        		} else {
-        			// log
-        		}
-        	} else {
-        		// log
-        	}
+        registerEvents: function(evts, module){
+            if(this.is_obj(evts) && module){
+                if(moduleData[module]){
+                    moduleData[module].events = evts;
+                }else{
+                    this.logger.warning('Event registration failed: Module Unknown: There is no module '+module+' registered');
+                }
+            }else{
+                this.logger.warning('Event registration failed: Parameter `evts` has to be of type object, `module` has to be of type string');
+            }
         },
-        removeEvents: function(evts, moduleSelector){
-            var i = 0, evt;
-        	if (this.is_arr(evts) && moduleSelector && (mod = moduleData[moduleSelector]) && mod.events) {
-        		for ( ; evt = evts[i++] ; ) {
-        				delete mod.events[evt];
+        removeEvents: function(evts, module){
+            var i, evt;
+        	if (this.is_arr(evts) && module && (mod = moduleData[module]) && mod.events) {
+        		for (i = 0; i < evts.length; i++) {
+        				delete mod.events[evts[i]];
         			}
         	}
         },
         triggerEvent: function(evt){
-            var mod;
-        	for (mod in moduleData) {
-        		if (moduleData.hasOwnProperty(mod)){
-        			mod = moduleData[mod];
-        			if (mod.events && mod.events[evt.type]) {
-        				mod.events[evt.type](evt.data);
+            var module;
+        	for (var moduleID in moduleData) {
+        		if (moduleData.hasOwnProperty(moduleID)){
+        			module = moduleData[moduleID];
+        			if (module.events && module.events[evt.type]) {
+        				module.events[evt.type](evt.data);
         			}
         		}
         	}
