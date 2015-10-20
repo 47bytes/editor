@@ -9,11 +9,9 @@ var Sandbox = function(){
             return this;
         },
         find: function(selector){
-            console.log('find request from: '+MODULE_SELECTOR);
             return CONTAINER.find(selector)[0];
         },
         findAll: function(selector){
-            console.log('find request from: '+MODULE_SELECTOR);
             return CONTAINER.query(selector);
         },
         hide: function(){

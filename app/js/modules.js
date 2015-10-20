@@ -37,6 +37,10 @@ CORE.createModule('editable', function(sb){
         },
 
         edit: function(e){
+            sb.notify({
+                type: 'editing',
+                data: e.currentTarget
+            })
             sb.hide();
 
         },
@@ -67,7 +71,6 @@ CORE.createModule('toolbar', function(sb){
     var thiz = this;
     return {
         init: function(){
-            console.log('toolbar initialized')
         },
         destroy: function(){
 
