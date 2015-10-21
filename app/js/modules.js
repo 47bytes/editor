@@ -74,6 +74,9 @@ CORE.registerModule('editor', function(sb){
             sb.ignore(['editable-editing']);
         },
         editContent: function(content){
+            sb.notify({
+                type: 'editor-toolbar-show'
+            })
             thiz.editedID = content.id;
             sb.dom.content(content.innerHTML, {
                 escapeHTML: false
@@ -90,6 +93,9 @@ CORE.registerModule('editor', function(sb){
                     selector: '#'+thiz.editedID
                 },
             });
+            sb.notify({
+                type: 'editor-toolbar-hide'
+            });
             sb.dom.content("");
         }
 
@@ -101,12 +107,23 @@ CORE.registerModule('toolbar', function(sb){
     return {
         init: function(){
             sb.dom.animate.hide();
+            sb.listen({
+                'editor-toolbar-show': this.show,
+                'editor-toolbar-hide': this.hide
+            })
         },
         destroy: function(){
 
         },
         render: function(){
 
+        },
+        show: function(){
+            console.log('yaa');
+            sb.dom.animate.show();
+        },
+        hide: function(){
+            sb.dom.animate.hide();
         }
     }
 });
