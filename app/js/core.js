@@ -83,7 +83,7 @@ var CORE = function(){
          * @param  {string} moduleID the `Modules` ID
          * @param  {[function]} creator  creation function
          */
-        createModule: function(moduleID, creator){
+        registerModule: function(moduleID, creator){
             var temp;
             if(typeof moduleID === 'string' && typeof creator === 'function'){
                 // we're going to call the creator so we can check
@@ -154,6 +154,18 @@ var CORE = function(){
                 }
                 return result;
             },
+            html: function(selector, content){
+                jQuery(selector).html(content);
+            },
+            text: function(selector, content){
+                jQuery(selector).text(content);
+            },
+            attr: function(selector, attrs){
+                jQuery(selector).attr(attrs);
+            },
+            focus: function(selector){
+                jQuery(selector).focus();
+            },
             bind: function(elem, evt, fn){
                 if (elem && evt) {
                     if (typeof evt === 'function') {
@@ -179,6 +191,10 @@ var CORE = function(){
             animate: {
                 hide: function(elem){
                     jQuery(elem).hide();
+                },
+
+                show: function(elem){
+                    jQuery(elem).show();
                 }
             }
         },

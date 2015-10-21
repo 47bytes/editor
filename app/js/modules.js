@@ -1,4 +1,4 @@
-CORE.createModule('editable', function(sb){
+CORE.registerModule('editable', function(sb){
     var thiz = this;
     var editableElementTypes = [
         'div',
@@ -15,10 +15,15 @@ CORE.createModule('editable', function(sb){
         init: function(){
             var i, j;
             var editableElem;
+
+            sb.listen({
+                'editor-commit': this.commit
+            });
+
             for(i = 0; i < editableElementTypes.length; i++){
                 editable = editableElementTypes[i];
                 // get all editable elements
-                editableElems = sb.findAll(editable);
+                editableElems = sb.dom.findAll(editable);
                 for(j = 0; j < editableElems.length; j++){
                     editableElem = editableElems[j];
                     // we cache the elements for later destruction
@@ -37,44 +42,72 @@ CORE.createModule('editable', function(sb){
         },
 
         edit: function(e){
+            console.log(e.current);
             sb.notify({
-                type: 'editing',
+                type: 'editable-editing',
                 data: e.currentTarget
             })
-            sb.hide();
+            sb.dom.animate.hide();
 
+        },
+
+        commit: function(e){
+            var changedElem = sb.dom.find(e.selector);
+            changedElem.innerHTML = e.content.innerHTML;
+            sb.dom.animate.show();
         },
 
     }
 });
 
-CORE.createModule('editor', function(sb){
+CORE.registerModule('editor', function(sb){
     var thiz = this;
+    var editedID;
     return {
         init: function(){
             sb.listen({
-                'editing': this.editContent
+                'editable-editing': this.editContent
             });
-
+            sb.addEvent('#editor', 'blur', this.leaveEditor);
         },
         destroy: function(){
-            sb.ignore(['editing']);
+            sb.ignore(['editable-editing']);
         },
         editContent: function(content){
-            console.dir(content);
+            thiz.editedID = content.id;
+            sb.dom.content(content.innerHTML, {
+                escapeHTML: false
+            });
+            sb.dom.edit();
+            //console.log(content);
+        },
+
+        leaveEditor: function(e){
+            sb.notify({
+                type: 'editor-commit',
+                data: {
+                    content: e.currentTarget,
+                    selector: '#'+thiz.editedID
+                },
+            });
+            sb.dom.content("");
         }
 
     }
 });
 
-CORE.createModule('toolbar', function(sb){
+CORE.registerModule('toolbar', function(sb){
     var thiz = this;
     return {
         init: function(){
+            sb.dom.animate.hide();
         },
         destroy: function(){
 
         },
+        render: function(){
+
+        }
     }
 });
 
