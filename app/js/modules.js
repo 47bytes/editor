@@ -77,7 +77,7 @@ CORE.registerModule('editor', function(sb){
                 'toolbar-editor-action-ul': this.handler,
                 'toolbar-editor-action-ol': this.handler
             });
-            sb.addEvent('#leave-editor', 'click', this.leaveEditor);
+            sb.addEvent('#leave-editor', 'click', this.exitEditor);
             sb.addEvent('#editor', 'input', this.handler);
         },
         destroy: function(){
@@ -137,8 +137,6 @@ CORE.registerModule('editor', function(sb){
         },
 
         startEditor: function(content){
-            console.log('****');
-            console.log(content);
             sb.notify({
                 type: 'editor-toolbar-show'
             })
@@ -151,7 +149,7 @@ CORE.registerModule('editor', function(sb){
             //console.log(content);
         },
 
-        leaveEditor: function(evnt){
+        exitEditor: function(evnt){
             sb.notify({
                 type: 'editor-commit',
                 data: {
