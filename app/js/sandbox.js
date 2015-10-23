@@ -1,5 +1,8 @@
-var Sandbox = function(){
-    var CONTAINER, CORE, MODULE_SELECTOR;
+var Sandbox = function(elem){
+    var CONTAINER = null,
+        CORE = null,
+        MODULE_SELECTOR = null,
+        CACHED = {};
     return {
         create: function(core, module){
             CORE = core;
@@ -9,10 +12,14 @@ var Sandbox = function(){
             return this;
         },
         dom: {
-            find: function(selector){
+            self: function(){
+                CACHED['dom.self'] = CONTAINER[0].innerHTML;
+                return CACHED['dom.self'];
+            },
+            findOne: function(selector){
                 return CONTAINER.query(selector)[0];
             },
-            findAll: function(selector){
+            find: function(selector){
                 return CONTAINER.query(selector);
             },
             content: function(content, options){
@@ -33,7 +40,7 @@ var Sandbox = function(){
                 });
                 CORE.dom.focus(MODULE_SELECTOR);
             },
-            attr: function(attrs){
+            attr: function(attr){
                 CORE.dom.attr(MODULE_SELECTOR, attrs);
             },
             animate: {

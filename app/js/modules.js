@@ -23,7 +23,7 @@ CORE.registerModule('editable', function(sb){
             for(i = 0; i < editableElementTypes.length; i++){
                 editable = editableElementTypes[i];
                 // get all editable elements
-                editableElems = sb.dom.findAll(editable);
+                editableElems = sb.dom.find(editable);
                 for(j = 0; j < editableElems.length; j++){
                     editableElem = editableElems[j];
                     // we cache the elements for later destruction
@@ -41,19 +41,19 @@ CORE.registerModule('editable', function(sb){
             }
         },
 
-        edit: function(e){
-            console.log(e.current);
+        edit: function(evnt){
+            console.log(evnt.current);
             sb.notify({
                 type: 'editable-editing',
-                data: e.currentTarget
+                data: evnt.currentTarget
             })
             sb.dom.animate.hide();
 
         },
 
-        commit: function(e){
-            var changedElem = sb.dom.find(e.selector);
-            changedElem.innerHTML = e.content.innerHTML;
+        commit: function(data){
+            var changedElem = sb.dom.findOne(data.selector);
+            changedElem.innerHTML = data.content;
             sb.dom.animate.show();
         },
 
@@ -66,12 +66,42 @@ CORE.registerModule('editor', function(sb){
     return {
         init: function(){
             sb.listen({
-                'editable-editing': this.editContent
+                'editable-editing': this.editContent,
+                'toolbar-editor-action-bold': this.edit.bold,
+                'toolbar-editor-action-italic': this.edit.italic,
+                'toolbar-editor-action-strikethrough': this.edit.strikethrough,
+                'toolbar-editor-action-link': this.edit.link,
+                'toolbar-editor-action-quote': this.edit.quote,
+                'toolbar-editor-action-ul': this.edit.ul,
+                'toolbar-editor-action-ol': this.edit.ol
             });
-            sb.addEvent('#editor', 'blur', this.leaveEditor);
+            sb.addEvent('#leave-editor', 'click', this.leaveEditor);
         },
         destroy: function(){
             sb.ignore(['editable-editing']);
+        },
+        edit: {
+            bold: function(content){
+                console.log('bold');
+            },
+            italic: function(content){
+                console.log('italic');
+            },
+            strikethrough: function(content){
+                console.log('strikethrough');
+            },
+            link: function(content){
+                console.log('link');
+            },
+            quote: function(content){
+                console.log('quote');
+            },
+            ul: function(content){
+                console.log('ul');
+            },
+            ol: function(content){
+                console.log('ol');
+            }
         },
         editContent: function(content){
             sb.notify({
@@ -85,11 +115,12 @@ CORE.registerModule('editor', function(sb){
             //console.log(content);
         },
 
-        leaveEditor: function(e){
+        leaveEditor: function(evnt){
+            var content = sb.dom.self();
             sb.notify({
                 type: 'editor-commit',
                 data: {
-                    content: e.currentTarget,
+                    content: content,
                     selector: '#'+thiz.editedID
                 },
             });
@@ -111,6 +142,21 @@ CORE.registerModule('toolbar', function(sb){
                 'editor-toolbar-show': this.show,
                 'editor-toolbar-hide': this.hide
             })
+
+            var buttons = sb.dom.find('button');
+            for(var i = 0; i < buttons.length; i++){
+                for(var j = 0; j < buttons[i].attributes.length; j++){
+                    if(buttons[i].attributes[j].nodeName == 'data-cm-toolbar-button'){
+                        sb.addEvent(buttons[i], 'click', function(evnt){
+                            console.log('registered');
+                            sb.notify({
+                                type: 'toolbar-editor-action-'+buttons[i].attributes[j].nodeValue,
+                                data: evnt
+                            });
+                        })
+                    }
+                }
+            }
         },
         destroy: function(){
 
@@ -119,7 +165,6 @@ CORE.registerModule('toolbar', function(sb){
 
         },
         show: function(){
-            console.log('yaa');
             sb.dom.animate.show();
         },
         hide: function(){
