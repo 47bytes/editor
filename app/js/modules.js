@@ -63,52 +63,88 @@ CORE.registerModule('editable', function(sb){
 CORE.registerModule('editor', function(sb){
     var thiz = this;
     var editedID;
+    var editedContent;
+    thiz.content = null;
     return {
         init: function(){
             sb.listen({
-                'editable-editing': this.editContent,
-                'toolbar-editor-action-bold': this.edit.bold,
-                'toolbar-editor-action-italic': this.edit.italic,
-                'toolbar-editor-action-strikethrough': this.edit.strikethrough,
-                'toolbar-editor-action-link': this.edit.link,
-                'toolbar-editor-action-quote': this.edit.quote,
-                'toolbar-editor-action-ul': this.edit.ul,
-                'toolbar-editor-action-ol': this.edit.ol
+                'editable-editing': this.startEditor,
+                'toolbar-editor-action-bold': this.handler,
+                'toolbar-editor-action-italic': this.handler,
+                'toolbar-editor-action-strikethrough': this.handler,
+                'toolbar-editor-action-link': this.handler,
+                'toolbar-editor-action-quote': this.handler,
+                'toolbar-editor-action-ul': this.handler,
+                'toolbar-editor-action-ol': this.handler
             });
             sb.addEvent('#leave-editor', 'click', this.leaveEditor);
+            sb.addEvent('#editor', 'input', this.handler);
         },
         destroy: function(){
             sb.ignore(['editable-editing']);
         },
-        edit: {
-            bold: function(content){
-                console.log('bold');
-            },
-            italic: function(content){
-                console.log('italic');
-            },
-            strikethrough: function(content){
-                console.log('strikethrough');
-            },
-            link: function(content){
-                console.log('link');
-            },
-            quote: function(content){
-                console.log('quote');
-            },
-            ul: function(content){
-                console.log('ul');
-            },
-            ol: function(content){
-                console.log('ol');
+
+        handler: function(evnt){
+            var content, tmpContent, selection;
+            var edit = {
+                bold: function(content){
+                    return '<b>'+content+'</b>';
+                },
+                italic: function(content){
+                    return '<em>'+content+'</em>';
+                },
+                strikethrough: function(content){
+                    return '<strike>'+content+'</strike>';
+                },
+                link: function(content){
+                    return '<a href="#">'+content+'</a>';
+                },
+                quote: function(content){
+                    return '<b>'+content+'</b>';
+                },
+                ul: function(content){
+                    return '<b>'+content+'</b>';
+                },
+                ol: function(content){
+                    return '<b>'+content+'</b>';
+                }
+            };
+            // 1. find out who triggered this function
+            if(evnt.action){
+                // toolbar action event
+
+                // BUG: if an action is selected the selected area needs
+                // to be recalculated because of the tags inserted
+                content = thiz.content.slice(
+                    evnt.selection.anchorOffset, // beginning of selection
+                    evnt.selection.focusOffset // end of selection
+                );
+                // everything leading up to the selection
+                preSelection = thiz.content.slice(0, evnt.selection.anchorOffset);
+                // everything after the selection
+                postSelection = thiz.content.slice(evnt.selection.focusOffset);
+                tmpContent = edit[evnt.action](content);
+                content = preSelection + tmpContent + postSelection;
+
+            }else{
+                content = evnt.currentTarget.innerHTML;
             }
+            // 2. find out what action to call
+            // 3. put result into thiz.content
+
+            thiz.content = content;
+            console.log(thiz.content);
         },
-        editContent: function(content){
+
+        startEditor: function(content){
+            console.log('****');
+            console.log(content);
             sb.notify({
                 type: 'editor-toolbar-show'
             })
             thiz.editedID = content.id;
-            sb.dom.content(content.innerHTML, {
+            thiz.content = content.innerHTML;
+            sb.dom.content(thiz.content, {
                 escapeHTML: false
             });
             sb.dom.edit();
@@ -116,11 +152,10 @@ CORE.registerModule('editor', function(sb){
         },
 
         leaveEditor: function(evnt){
-            var content = sb.dom.self();
             sb.notify({
                 type: 'editor-commit',
                 data: {
-                    content: content,
+                    content: thiz.content,
                     selector: '#'+thiz.editedID
                 },
             });
@@ -145,17 +180,21 @@ CORE.registerModule('toolbar', function(sb){
 
             var buttons = sb.dom.find('button');
             for(var i = 0; i < buttons.length; i++){
-                for(var j = 0; j < buttons[i].attributes.length; j++){
-                    if(buttons[i].attributes[j].nodeName == 'data-cm-toolbar-button'){
-                        sb.addEvent(buttons[i], 'click', function(evnt){
-                            console.log('registered');
+                sb.addEvent(buttons[i], 'click', function(evnt){
+                    var button = evnt.currentTarget;
+                    for(var j = 0; j < button.attributes.length; j++){
+                        if(button.attributes[j].nodeName == 'data-cm-toolbar-button'){
                             sb.notify({
-                                type: 'toolbar-editor-action-'+buttons[i].attributes[j].nodeValue,
-                                data: evnt
+                                type: 'toolbar-editor-action-'+button.attributes[j].nodeValue,
+                                data: {
+                                    evnt: evnt,
+                                    selection: window.getSelection(),
+                                    action: button.attributes[j].nodeValue
+                                }
                             });
-                        })
+                        }
                     }
-                }
+                });
             }
         },
         destroy: function(){
@@ -172,6 +211,5 @@ CORE.registerModule('toolbar', function(sb){
         }
     }
 });
-
 
 CORE.startAll();
